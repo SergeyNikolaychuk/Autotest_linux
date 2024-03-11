@@ -1,27 +1,26 @@
-# Доработать функцию из предыдущего задания таким образом, чтобы у неё появился дополнительный режим работы,
-# в котором вывод разбивается на слова с удалением всех знаков пунктуации
-# (их можно взять из списка string.punctuation модуля string). В этом режиме должно проверяться наличие слова в выводе.
-import re
-import string
-import subprocess
+iimport subprocess
+
+FOLDER_IN = "/home/ubuntu/tst"
+FOLDER_OUT = "/home/ubuntu/out"
+FOLDER_EXTRACT = "/home/ubuntu/folder_test"
 
 
-def get_text(command, text):
-    result = subprocess.run(command, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
-    if not result.returncode and text in split_text(result.stdout):
+def checkout(cmd, text):
+    result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, encoding='utf-8')
+    if not result.returncode and text in result.stdout:
         return True
     else:
         return False
 
 
-def split_text(text):
-    for char in text:
-        if char in string.punctuation:
-            text = text.replace(char, ' ')
-    list_text = re.split('[ \\n]', text)
-    result = []
-    for item in list_text:
-        if item != '':
-            result.append(item)
-    print(result)
-    return result
+def test_1():
+    res1 = checkout(f"cd {FOLDER_IN}; 7z a {FOLDER_OUT}/arx2", "Everything is Ok")
+    res2 = checkout(f"cd {FOLDER_OUT}; 7z l arx2.7z", "test.txt")
+    assert res1 and res2, "test1 FAIL"
+
+
+def test_2():
+    res1 = checkout(f"cd {FOLDER_OUT}; 7z x arx2.7z -o{FOLDER_EXTRACT} -y", "Everything is Ok")
+    res2 = checkout(f"ls {FOLDER_EXTRACT}", "tst_2")
+    res3 = checkout(f"ls {FOLDER_EXTRACT}/tst_2", "test.txt")
+    assert res1 and res2 and res3, "test2 FAIL"
